@@ -1,10 +1,10 @@
 SIM_DIR     := ${PWD}
 RUN_DIR      := ${PWD}/run
 
-TESTNAME     := rv32ui-p-add 
+TESTNAME     := rv32ui-p-add
 TESTCASE     := ${RUN_DIR}/../../riscv-tools/riscv-tests/isa/generated/${TESTNAME}
 
-SIM          := iverilog 
+SIM          := iverilog
 DUMPWAVE     := 1
 
 CORE        := e203
@@ -16,7 +16,7 @@ core_name = $(shell echo $(CORE) | tr A-Z a-z)
 
 all: run_test
 
-install: 
+install:
 	mkdir -p ${SIM_DIR}/install/tb
 	cp ${SIM_DIR}/../tb/*.v ${SIM_DIR}/install/tb -rf
 	cp ${SIM_DIR}/../rtl/${core_name} ${SIM_DIR}/install/rtl -rf
@@ -49,15 +49,16 @@ regress_prepare:
 	@-rm -rf ${RUN_DIR}/rv32*.log
 regress_run:
 	$(foreach tst,$(SELF_TESTS), make run_test DUMPWAVE=0 TESTCASE=$(tst);)
+
 regress_collect:
 	@-rm -rf ${RUN_DIR}/regress.res
 	@find ${RUN_DIR} -name "rv32*.log" -exec bin/find_test_fail.csh {} >> ${RUN_DIR}/regress.res \;
 	@cat ${RUN_DIR}/regress.res
-regress: regress_prepare regress_run regress_collect 
+regress: regress_prepare regress_run regress_collect
 
 clean:
 	rm -rf run
 	rm -rf install
 
-.PHONY: compile run install clean all run_test regress regress_prepare regress_run regress_collect 
+.PHONY: compile run install clean all run_test regress regress_prepare regress_run regress_collect
 

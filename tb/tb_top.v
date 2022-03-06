@@ -30,7 +30,7 @@ module tb_top();
   reg pc_write_to_host_flag;
 
   always @(posedge hfclk or negedge rst_n)
-  begin 
+  begin
     if(rst_n == 1'b0) begin
         pc_write_to_host_cnt <= 32'b0;
         pc_write_to_host_flag <= 1'b0;
@@ -46,7 +46,7 @@ module tb_top();
   end
 
   always @(posedge hfclk or negedge rst_n)
-  begin 
+  begin
     if(rst_n == 1'b0) begin
         cycle_count <= 32'b0;
     end
@@ -59,7 +59,7 @@ module tb_top();
   wire i_ready = `EXU.i_ready;
 
   always @(posedge hfclk or negedge rst_n)
-  begin 
+  begin
     if(rst_n == 1'b0) begin
         valid_ir_cycle <= 32'b0;
     end
@@ -115,7 +115,7 @@ module tb_top();
        //   It is in common code, not in exception code, by checking MIE bit
        //   It is in read operation, not write, otherwise the test cannot recover
     force `ITCM_BUS_ERR = tb_itcm_bus_err
-                        & `STATUS_MIE 
+                        & `STATUS_MIE
                         & `ITCM_BUS_READ
                         ;
   end
@@ -168,9 +168,9 @@ module tb_top();
   integer dumpwave;
 
   initial begin
-    $display("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");  
+    $display("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     if($value$plusargs("TESTCASE=%s",testcase))begin
-      $display("TESTCASE=%s",testcase);
+      $display("TESTCASE=%0s",testcase);
     end
 
     pc_write_to_host_flag <=0;
@@ -189,7 +189,7 @@ module tb_top();
         $display("~~~~~~~~~~~~~ Test Result Summary ~~~~~~~~~~~~~~~~~~~~~~");
         $display("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         $display("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        $display("~TESTCASE: %s ~~~~~~~~~~~~~", testcase);
+        $display("~TESTCASE: %0s ~~~~~~~~~~~~~", testcase);
         $display("~~~~~~~~~~~~~~Total cycle_count value: %d ~~~~~~~~~~~~~", cycle_count);
         $display("~~~~~~~~~~The valid Instruction Count: %d ~~~~~~~~~~~~~", valid_ir_cycle);
         $display("~~~~~The test ending reached at cycle: %d ~~~~~~~~~~~~~", pc_write_to_host_cycle);
@@ -228,19 +228,15 @@ module tb_top();
   end
 
   always
-  begin 
+  begin
      #2 clk <= ~clk;
   end
 
   always
-  begin 
+  begin
      #33 lfextclk <= ~lfextclk;
   end
 
-
-
-  
-  
   initial begin
     if($value$plusargs("DUMPWAVE=%d",dumpwave)) begin
       if(dumpwave != 0) begin
@@ -259,9 +255,6 @@ module tb_top();
       end
     end
   end
-
-
-
 
   integer i;
 
@@ -291,7 +284,7 @@ module tb_top();
         $display("ITCM 0x16: %h", `ITCM.mem_r[8'h16]);
         $display("ITCM 0x20: %h", `ITCM.mem_r[8'h20]);
 
-    end 
+    end
 
 
 
@@ -305,7 +298,7 @@ module tb_top();
 
 
 e203_soc_top u_e203_soc_top(
-   
+
    .hfextclk(hfclk),
    .hfxoscen(),
 
@@ -350,7 +343,7 @@ e203_soc_top u_e203_soc_top(
     .io_pads_bootrom_n_i_ival       (1'b0),// In Simulation we boot from ROM
     .io_pads_dbgmode0_n_i_ival       (1'b1),
     .io_pads_dbgmode1_n_i_ival       (1'b1),
-    .io_pads_dbgmode2_n_i_ival       (1'b1) 
+    .io_pads_dbgmode2_n_i_ival       (1'b1)
 );
 
 
