@@ -2,18 +2,16 @@
 
 module system
 (
-  input wire CLK100MHZ,//GCLK-W19
-  input wire CLK32768KHZ,//RTC_CLK-Y18
+  input wire CLK50MHZ,//GCLK-W19
 
   input wire fpga_rst,//FPGA_RESET-T6
   input wire mcu_rst,//MCU_RESET-P20
-
 
   // Dedicated QSPI interface
   output wire qspi0_cs,
   output wire qspi0_sck,
   inout wire [3:0] qspi0_dq,
-                           
+
   //gpioA
   inout wire [31:0] gpioA,//GPIOA00~GPIOA31
 
@@ -22,22 +20,23 @@ module system
 
   // JD (used for JTAG connection)
   inout wire mcu_TDO,//MCU_TDO-N17
-  inout wire mcu_TCK,//MCU_TCK-P15 
+  inout wire mcu_TCK,//MCU_TCK-P15
   inout wire mcu_TDI,//MCU_TDI-T18
   inout wire mcu_TMS,//MCU_TMS-P17
 
   //pmu_wakeup
-
   inout wire pmu_paden,  //PMU_VDDPADEN-U15
   inout wire pmu_padrst, //PMU_VADDPARST_V15
-  inout wire mcu_wakeup  //MCU_WAKE-N15
+  inout wire mcu_wakeup,  //MCU_WAKE-N15
+
+  //test clock
+  output wire clk_16m,
+  output wire clk_32768hz
 );
 
   wire clk_out1;
   wire mmcm_locked;
-
   wire reset_periph;
-
   wire ck_rst;
 
   // All wires connected to the chip top
@@ -78,7 +77,6 @@ module system
   wire dut_io_pads_qspi0_dq_3_o_oval;
   wire dut_io_pads_qspi0_dq_3_o_oe;
 
-
   wire dut_io_pads_aon_erst_n_i_ival;
   wire dut_io_pads_aon_pmu_dwakeup_n_i_ival;
   wire dut_io_pads_aon_pmu_vddpaden_o_oval;
@@ -92,21 +90,29 @@ module system
   // Clock & Reset
   wire clk_8388;
   wire clk_16M;
-  
-
+  wire slowclk;
 
   mmcm ip_mmcm
   (
     .resetn(ck_rst),
-    .clk_in1(CLK100MHZ),
-    
-    .clk_out2(clk_16M), // 16 MHz, this clock we set to 16MHz 
+    .clk_in1(CLK50MHZ),
+
+    .clk_out1(clk_8388),
+    .clk_out2(clk_16M), // 16 MHz, this clock we set to 16MHz
     .locked(mmcm_locked)
   );
 
-  assign ck_rst = fpga_rst & mcu_rst;
+  clkdivider slowclkgen
+  (
+    .clk(clk_8388),
+    .reset(~mmcm_locked),
+    .clk_out(slowclk)   // 32.768KHz
+  );
 
-  
+  assign clk_16m = clk_16M;
+  assign clk_32768hz = slowclk;
+
+  assign ck_rst = fpga_rst & mcu_rst;
 
   reset_sys ip_reset_sys
   (
@@ -125,7 +131,7 @@ module system
   //=================================================
   // SPI0 Interface
 
-  wire [3:0] qspi0_ui_dq_o; 
+  wire [3:0] qspi0_ui_dq_o;
   wire [3:0] qspi0_ui_dq_oe;
   wire [3:0] qspi0_ui_dq_i;
 
@@ -175,6 +181,7 @@ module system
     .I(dut_io_pads_gpioB_o_oval),
     .T(~dut_io_pads_gpioB_o_oe)
   );
+
   //=================================================
   // JTAG IOBUFs
 
@@ -264,8 +271,8 @@ module system
   // Shield header row 0: PD0-PD7
 
   // Use the LEDs for some more useful debugging things.
-  assign pmu_paden  = dut_io_pads_aon_pmu_vddpaden_o_oval;  
-  assign pmu_padrst = dut_io_pads_aon_pmu_padrst_o_oval;		
+  assign pmu_paden  = dut_io_pads_aon_pmu_vddpaden_o_oval;
+  assign pmu_padrst = dut_io_pads_aon_pmu_padrst_o_oval;
 
   // model select
   assign dut_io_pads_bootrom_n_i_ival  = 1'b1;   //
@@ -279,10 +286,10 @@ module system
     .hfextclk(clk_16M),
     .hfxoscen(),
 
-    .lfextclk(CLK32768KHZ), 
+    .lfextclk(slowclk),
     .lfxoscen(),
 
-       // Note: this is the real SoC top AON domain slow clock
+     // Note: this is the real SoC top AON domain slow clock
     .io_pads_jtag_TCK_i_ival(dut_io_pads_jtag_TCK_i_ival),
     .io_pads_jtag_TMS_i_ival(dut_io_pads_jtag_TMS_i_ival),
     .io_pads_jtag_TDI_i_ival(dut_io_pads_jtag_TDI_i_ival),
@@ -313,7 +320,6 @@ module system
     .io_pads_qspi0_dq_3_o_oval(dut_io_pads_qspi0_dq_3_o_oval),
     .io_pads_qspi0_dq_3_o_oe  (dut_io_pads_qspi0_dq_3_o_oe),
 
-
        // Note: this is the real SoC top level reset signal
     .io_pads_aon_erst_n_i_ival(ck_rst),
     .io_pads_aon_pmu_dwakeup_n_i_ival(dut_io_pads_aon_pmu_dwakeup_n_i_ival),
@@ -325,11 +331,10 @@ module system
 
     .io_pads_dbgmode0_n_i_ival       (dut_io_pads_dbgmode0_n_i_ival),
     .io_pads_dbgmode1_n_i_ival       (dut_io_pads_dbgmode1_n_i_ival),
-    .io_pads_dbgmode2_n_i_ival       (dut_io_pads_dbgmode2_n_i_ival) 
+    .io_pads_dbgmode2_n_i_ival       (dut_io_pads_dbgmode2_n_i_ival)
   );
 
   // Assign reasonable values to otherwise unconnected inputs to chip top
-
   wire iobuf_dwakeup_o;
   IOBUF
   #(
@@ -346,8 +351,6 @@ module system
     .T(1'b1)
   );
   assign dut_io_pads_aon_pmu_dwakeup_n_i_ival = (~iobuf_dwakeup_o);
-
-  
 
   assign dut_io_pads_aon_pmu_vddpaden_i_ival = 1'b1;
 
@@ -370,8 +373,4 @@ module system
   assign dut_io_pads_qspi0_dq_2_i_ival = qspi0_ui_dq_i[2];
   assign dut_io_pads_qspi0_dq_3_i_ival = qspi0_ui_dq_i[3];
 
-
-
 endmodule
-
-
