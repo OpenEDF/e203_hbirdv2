@@ -104,3 +104,7 @@ NOTE:
     - Add NICE(Nuclei Instruction Co-unit Extension) for E203 core
     - Integrate the APB interface peripherals(GPIO, I2C, UART, SPI, PWM) from PULP Platform
     - Add new development board(Nuclei ddr200t) support for Hummingbirdv2 SoC. 
+#### Generate mcs and download
+[![asciicast](https://asciinema.org/a/476656.svg)](https://asciinema.org/a/476656)
+
+
