@@ -1,0 +1,184 @@
+variables:
+    DOC_SERVER: doc
+    DOC_CENTER: /home/xl_ci/doc_center
+
+before_script:
+    - module load nucleisys/riscv-nuclei-elf-gcc
+    - module load nucleisys/openocd
+    - source .ci/build_sdk.sh
+    - source .ci/build_applications.sh
+
+stages:
+    - doc_build
+    - doc_deploy
+    - build_hbird_eval
+    - build_ddr200t
+
+## Job for build document
+build_doc:
+    stage: doc_build
+    only:
+        changes:
+          - doc/source/**/**/**/*
+          - .gitlab-ci.yml
+    retry: 1
+    artifacts:
+        name: "hbird_sdk_doc-${CI_COMMIT_SHA::8}"
+        paths:
+            - doc/build
+        expire_in: 2 day
+    script:
+        - cd doc
+        - pip3 install --user -r requirements.txt
+        - export PATH=$HOME/.local/bin:$PATH
+        - make clean
+        - make all
+        - make latexpdf
+        - make clean_xml
+        - cp build/latex/*.pdf build/html/
+    tags:
+        - env::native
+        - host::xls01
+
+## Job for deploy document to internal server
+deploy_doc:
+    stage: doc_deploy
+    when: on_success
+    retry: 1
+    only:
+        refs:
+          - master
+        changes:
+          - doc/source/**/**/**/*
+          - .gitlab-ci.yml
+    script:
+        - ssh $DOC_SERVER "rm -rf $DOC_CENTER/hbird_sdk/*"
+        - ssh $DOC_SERVER "mkdir -p $DOC_CENTER/hbird_sdk/"
+        - cd doc/build
+        - scp -r html $DOC_SERVER:$DOC_CENTER/hbird_sdk
+    tags:
+        - env::native
+        - host::xls01
+    dependencies:
+        - build_doc
+
+## Job for deploy document to nuclei website
+deploy_website:
+    stage: doc_deploy
+    when: on_success
+    retry: 1
+    only:
+        refs:
+          - master
+        changes:
+          - doc/source/**/**/**/*
+    script:
+        - ./.ci/ftp_deploy.sh $FTPUSER $FTPPWD $FTPSERVER doc/build/html hbird_sdk
+    tags:
+        - env::native
+        - host::xls01
+    dependencies:
+        - build_doc
+
+## Jobs for board hbird_eval
+.build_hbird_eval_job_template: &build_hbird_eval_job_def
+    stage: build_hbird_eval
+    tags:
+        - env::native
+        - host::xls01
+    script:
+        - SOC=hbird BOARD=hbird_eval hsdk_build_directory    application
+        - SOC=hbird BOARD=hbird_eval hsdk_build_directory    test
+
+# Build For HBird Evaluation Board with E203 Core, with Flash, FlashXIP, ILM Mode
+build_hbird_eval_ilm_e203:
+    variables:
+        DOWNLOAD: "ilm"
+        SOC: "hbird"
+        CORE: "e203"
+    <<: *build_hbird_eval_job_def
+
+build_hbird_eval_flash_e203:
+    variables:
+        DOWNLOAD: "flash"
+        CORE: "e203"
+    <<: *build_hbird_eval_job_def
+
+build_hbird_eval_flashxip_e203:
+    variables:
+        DOWNLOAD: "flashxip"
+        CORE: "e203"
+    <<: *build_hbird_eval_job_def
+
+# Build For E203E, with Flash, FlashXIP, ILM Mode
+build_hbird_eval_ilm_e203e:
+    variables:
+        DOWNLOAD: "ilm"
+        CORE: "e203e"
+        FIND_IGNORE: "! -wholename \"*dsp*\""
+    <<: *build_hbird_eval_job_def
+
+build_hbird_eval_flash_e203e:
+    variables:
+        DOWNLOAD: "flash"
+        CORE: "e203e"
+        FIND_IGNORE: "! -wholename \"*dsp*\""
+    <<: *build_hbird_eval_job_def
+
+build_hbird_eval_flashxip_e203e:
+    variables:
+        DOWNLOAD: "flashxip"
+        CORE: "e203e"
+        FIND_IGNORE: "! -wholename \"*dsp*\""
+    <<: *build_hbird_eval_job_def
+
+## Jobs for board ddr200t
+.build_ddr200t_job_template: &build_ddr200t_job_def
+    stage: build_ddr200t
+    tags:
+        - env::native
+        - host::xls01
+    script:
+        - SOC=hbirdv2 BOARD=ddr200t hsdk_build_directory    application
+        - SOC=hbirdv2 BOARD=ddr200t hsdk_build_directory    test
+
+# Build For HBird Evaluation Board with E203 Core, with Flash, FlashXIP, ILM Mode
+build_ddr200t_ilm_e203:
+    variables:
+        DOWNLOAD: "ilm"
+        CORE: "e203"
+    <<: *build_ddr200t_job_def
+
+build_ddr200t_flash_e203:
+    variables:
+        DOWNLOAD: "flash"
+        CORE: "e203"
+    <<: *build_ddr200t_job_def
+
+build_ddr200t_flashxip_e203:
+    variables:
+        DOWNLOAD: "flashxip"
+        CORE: "e203"
+    <<: *build_ddr200t_job_def
+
+# Build For E203E, with Flash, FlashXIP, ILM Mode
+build_ddr200t_ilm_e203e:
+    variables:
+        DOWNLOAD: "ilm"
+        CORE: "e203e"
+        FIND_IGNORE: "! -wholename \"*dsp*\""
+    <<: *build_ddr200t_job_def
+
+build_ddr200t_flash_e203e:
+    variables:
+        DOWNLOAD: "flash"
+        CORE: "e203e"
+        FIND_IGNORE: "! -wholename \"*dsp*\""
+    <<: *build_ddr200t_job_def
+
+build_ddr200t_flashxip_e203e:
+    variables:
+        DOWNLOAD: "flashxip"
+        CORE: "e203e"
+        FIND_IGNORE: "! -wholename \"*dsp*\""
+    <<: *build_ddr200t_job_def
