@@ -16,7 +16,7 @@ module system
   inout wire [31:0] gpioA,//GPIOA00~GPIOA31
 
   //gpioB
-  inout wire [31:0] gpioB,//GPIOB00~GPIOB31
+  //inout wire [31:0] gpioB,//GPIOB00~GPIOB31
 
   // JD (used for JTAG connection)
   inout wire mcu_TDO,//MCU_TDO-N17
@@ -58,10 +58,11 @@ module system
   wire [32-1:0] dut_io_pads_gpioA_o_oval;
   wire [32-1:0] dut_io_pads_gpioA_o_oe;
 
+/* Macro: TODO: NOUSE GPIOB
   wire [32-1:0] dut_io_pads_gpioB_i_ival;
   wire [32-1:0] dut_io_pads_gpioB_o_oval;
   wire [32-1:0] dut_io_pads_gpioB_o_oe;
-
+*/
   wire dut_io_pads_qspi0_sck_o_oval;
   wire dut_io_pads_qspi0_cs_0_o_oval;
   wire dut_io_pads_qspi0_dq_0_i_ival;
@@ -167,6 +168,7 @@ module system
     .T(~dut_io_pads_gpioA_o_oe)
   );
 
+/* Macro: TODO NOUSE GPIOB
   IOBUF
   #(
     .DRIVE(12),
@@ -181,7 +183,7 @@ module system
     .I(dut_io_pads_gpioB_o_oval),
     .T(~dut_io_pads_gpioB_o_oe)
   );
-
+*/
   //=================================================
   // JTAG IOBUFs
 
@@ -299,11 +301,11 @@ module system
     .io_pads_gpioA_i_ival(dut_io_pads_gpioA_i_ival),
     .io_pads_gpioA_o_oval(dut_io_pads_gpioA_o_oval),
     .io_pads_gpioA_o_oe  (dut_io_pads_gpioA_o_oe),
-
+/* Macro TODO: NOUSE GPIOB
     .io_pads_gpioB_i_ival(dut_io_pads_gpioB_i_ival),
     .io_pads_gpioB_o_oval(dut_io_pads_gpioB_o_oval),
     .io_pads_gpioB_o_oe  (dut_io_pads_gpioB_o_oe),
-
+*/
     .io_pads_qspi0_sck_o_oval (dut_io_pads_qspi0_sck_o_oval),
     .io_pads_qspi0_cs_0_o_oval(dut_io_pads_qspi0_cs_0_o_oval),
 

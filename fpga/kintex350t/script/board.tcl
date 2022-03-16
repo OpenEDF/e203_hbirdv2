@@ -1,3 +1,3 @@
-set name {dvc35t_macro}
-set part_fpga {xc7a35tfgg484-2}
+set name {kintex325t}
+set part_fpga {xc7k325tffg676-2}
 set bootrom_inst {rom}
