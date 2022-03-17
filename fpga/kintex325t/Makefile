@@ -1,6 +1,7 @@
+#-----------------------------------------------------------------------------------------
 VIVADO ?= vivado
 VIVADOFLAGS := \
-	-nojournal -mode batch \
+	-nojournal -mode tcl \
 	-source script/board.tcl \
 	-source script/prologue.tcl
 
@@ -15,8 +16,9 @@ FLASHED_PROGRAM ?=
 BIT_TCL = -source script/init.tcl -source script/impl.tcl 
 BUILD_MCS_TCL = -source script/buildfile.tcl
 bit_file := obj/system.bit
+DOWNLOAD_MCS_TCL = -source script/download_mcs.tcl 
 
-.PHONY: bit mcs setup clean
+.PHONY: bit mcs setup clean load
 bit:
 	VSRCS="$(VSRCS)" EXTRA_VSRCS="$(EXTRA_VSRCS)" $(VIVADO) $(VIVADOFLAGS) $(BIT_TCL)
 
@@ -26,5 +28,9 @@ mcs: $(bit_file)
 setup:
 	VSRCS="$(VSRCS)" EXTRA_VSRCS="$(EXTRA_VSRCS)" $(VIVADO) $(VIVADOFLAGS_SETUP) -source script/init_setup.tcl 
 
-clean::
-	rm -rf -- .Xil .ip_user_files *.os obj src/generated usage_statistics_webtalk.xml usage_statistics_webtalk.html *.log build
+load:
+	$(VIVADO) $(VIVADOFLAGS) $(DOWNLOAD_MCS_TCL)
+
+clean:
+	rm -rf -- .Xil .ip_user_files *.os obj src/generated usage_statistics_webtalk.xml usage_statistics_webtalk.html *.log build *.jou *.log
+#-----------------------------------------------------------------------------------------

@@ -25,7 +25,7 @@ verilog := $(wildcard ${INSTALL_RTL}/*/*.v)
 verilog += $(wildcard ${INSTALL_RTL}/*/*/*.v)
 verilog += $(wildcard ${INSTALL_RTL}/*.v)
 
-.PHONY: mcs install bit setup clean
+.PHONY: mcs install bit setup clean load
 mcs : install
 	BASEDIR=${base_dir} VSRCS="$(verilog)" EXTRA_VSRCS="$(EXTRA_FPGA_VSRCS)" $(MAKE) -C $(FPGA_DIR) mcs
 
@@ -35,7 +35,9 @@ bit : install
 setup:
 	BASEDIR=${base_dir} VSRCS="$(verilog)" EXTRA_VSRCS="$(EXTRA_FPGA_VSRCS)" $(MAKE) -C $(FPGA_DIR) setup
 
-.PHONY: clean
+load:
+	$(MAKE) -C $(FPGA_DIR) load
+
 clean:
 	$(MAKE) -C $(FPGA_DIR) clean
-	rm -rf fpga_flist install vivado.* novas.* xvlog.* xsim.dir
+	rm -rf fpga_flist install vivado.* novas.* xvlog.* xsim.dir *jou *.log
