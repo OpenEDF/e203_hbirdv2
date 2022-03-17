@@ -63,9 +63,11 @@ set_property PACKAGE_PIN A14   [get_ports {gpioA[19]}]
 ## Lora TX (uart2-rx)
 set_property PACKAGE_PIN D11   [get_ports {gpioA[18]}]     
 ## UART TX
-set_property PACKAGE_PIN D14   [get_ports {gpioA[17]}]
+#set_property PACKAGE_PIN D14   [get_ports {gpioA[17]}]
+set_property PACKAGE_PIN A17   [get_ports {gpioA[17]}]
 ## UART RX
-set_property PACKAGE_PIN E12   [get_ports {gpioA[16]}]
+#set_property PACKAGE_PIN E12   [get_ports {gpioA[16]}]
+set_property PACKAGE_PIN B17   [get_ports {gpioA[16]}]
 ## EEPROM SDA
 set_property PACKAGE_PIN B12   [get_ports {gpioA[15]}]
 ## EEPROM SCL
