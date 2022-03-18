@@ -228,7 +228,7 @@ set_property IOSTANDARD LVCMOS33 [get_ports {gpioA[0]}]
 #set_property IOSTANDARD LVCMOS33 [get_ports {gpioB[0]}]
 
 #####         SPI Configurate Setting        #######
-et_property CFGBVS VCCO [current_design]
+set_property CFGBVS VCCO [current_design]
 set_property CONFIG_VOLTAGE 3.3 [current_design]
 set_property BITSTREAM.CONFIG.SPI_BUSWIDTH 4 [current_design] 
 set_property CONFIG_MODE SPIx4 [current_design] 
